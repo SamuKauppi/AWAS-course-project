@@ -1,0 +1,12 @@
+# Node.js dependencies
+node_modules/
+
+# .env file containing sensitive information
+.env
+
+# Logs
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
