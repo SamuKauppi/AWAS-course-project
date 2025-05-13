@@ -44,9 +44,9 @@ app.post('/login', (req, res) => {
         if (err) return res.status(500).send(err.message);
 
         if (results.length > 0) {
-            return res.send('Login successful');
+            return res.status(200).send('Login successful');
         } else {
-            return res.send('Login failed');
+            return res.status(401).send('Login failed');
         }
     });
 });
