@@ -1,11 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const session = require('express-session');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded bodies
+
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } 
+}));
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -44,10 +52,22 @@ app.post('/login', (req, res) => {
         if (err) return res.status(500).send(err.message);
 
         if (results.length > 0) {
+            req.session.user = username;
             return res.status(200).send('Login successful');
         } else {
             return res.status(401).send('Login failed');
         }
+    });
+});
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if(err)
+        {
+            return res.status(500).send('Could not log out');
+        }
+        res.clearCookie('connect.sid');
+        res.status(200).send('Logged out');
     });
 });
 
