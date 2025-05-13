@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vulnerable site</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="welcome">
+            <h1>Welcome to the Vulnerable Site</h1>
+            <p>Log in or sign up to access exclusive content.</p>
+        </div>
+        
+    </header>
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button id="loginTabBtn" class="active" onclick="showTab('login')">Log In</button>
+                <button id="signinTabBtn" onclick="showTab('signin')">Sign In</button>
+            </div>
+            <div id="login" class="tab-content active">
+                <form action="login.php" method="post">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    <input type="submit" value="Login">
+                </form>
+            </div>
+            <div id="signin" class="tab-content">
+                <form action="register.php" method="post">
+                    <label for="newusername">Username:</label>
+                    <input type="text" id="newusername" name="username" required>
+                    <label for="newpassword">Password:</label>
+                    <input type="password" id="newpassword" name="password" required>
+                    <input type="submit" value="Sign In">
+                </form>
+            </div>
+        </div>
+        <script>
+            function showTab(tab) {
+                document.getElementById('login').classList.remove('active');
+                document.getElementById('signin').classList.remove('active');
+                document.getElementById('loginTabBtn').classList.remove('active');
+                document.getElementById('signinTabBtn').classList.remove('active');
+                document.getElementById(tab).classList.add('active');
+                document.getElementById(tab + 'TabBtn').classList.add('active');
+            }
+        </script>
+</body>
+</html>
