@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Awas DB – Auth Test</title>
+  <link rel="stylesheet" href="styles.css"> <!-- if you add CSS later -->
+</head>
+<body>
+  <h1>Awas DB – Auth Test</h1>
+
+  <form id="registerForm">
+    <h2>Register</h2>
+    <input name="username" type="text" placeholder="Username" required>
+    <input name="password" type="password" placeholder="Password" required>
+    <button type="submit">Register</button>
+  </form>
+
+  <form id="loginForm">
+    <h2>Login</h2>
+    <input name="username" type="text" placeholder="Username" required>
+    <input name="password" type="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <form id="transferForm">
+    <h2>Transfer</h2>
+    <input name="from" type="text" placeholder="From username" required>
+    <input name="to"   type="text" placeholder="To username"   required>
+    <input name="amount" type="number" placeholder="Amount"    required>
+    <button type="submit">Transfer</button>
+  </form>
+
+  <div>
+    <h2>Logout</h2>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <h2>Status</h2>
+  <pre id="status">Ready</pre>
+
+  <script src="app.js"></script>
+</body>
+</html>
