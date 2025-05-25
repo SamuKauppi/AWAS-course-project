@@ -3,9 +3,14 @@ const express = require('express');
 const session = require('express-session');
 const mysql = require('mysql2');
 
+const cors = require('cors');
+
+
 const app = express();
 const port = 3000;
 
+// ----- CORS -----
+app.use(cors());  
 // ----- STATIC FRONTEND -----
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -118,7 +123,16 @@ app.post('/transfer', (req, res) => {
   });
 });
 
-
+// Get for user balance, test
+app.get('/balance', (req, res) => {
+  const { username } = req.query;
+  const sql = `SELECT money FROM users WHERE username = ?`;
+  db.query(sql, [username], (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    if (results.length === 0) return res.status(404).send('User not found');
+    res.json({ money: results[0].money });
+  });
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
