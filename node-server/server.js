@@ -2,10 +2,10 @@ const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const mysql = require('mysql2');
-
 const cors = require('cors');
+const fs = require('fs');
 
-
+// ----- APP -----
 const app = express();
 const port = 3000;
 
@@ -36,7 +36,8 @@ const db = mysql.createConnection({
     host: 'localhost',      // <-- your MySQL host
     user: 'root',           // <-- your MySQL user
     password: '',               // <-- your MySQL password (empty string if none)
-    database: 'awas_db'         // <-- your database name
+    database: 'awas_db',         // <-- your database name
+    multipleStatements: true
 });
 
 db.connect(err => {
@@ -133,6 +134,38 @@ app.get('/balance', (req, res) => {
     res.json({ money: results[0].money });
   });
 });
+
+// GET comments (now including timestamp)
+app.get('/comments', (req, res) => {
+  const sql = 'SELECT id, author, text, created_at FROM comments';
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    res.json(results);
+  });
+});
+
+// POST new comment (DB defaults created_at to NOW())
+app.post('/comments', (req, res) => {
+  const { author, text } = req.body;
+  const sql = `
+    INSERT INTO comments (author, text)
+    VALUES ('${author}', '${text}')
+  `;
+  db.query(sql, err => {
+    if (err) return res.status(500).send(err.message);
+    res.status(201).send('Comment saved');
+  });
+});
+
+// Reset Database
+app.get('/reset', (req, res) => {
+  const sql = fs.readFileSync(path.join(__dirname, 'reset.sql')).toString();
+  db.query(sql, err => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Database reset to default state.');
+  });
+});
+
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
