@@ -15,7 +15,7 @@ const port = 3000;
 app.use(cors({
   origin: 'http://localhost:3000', // e.g., 5500 or 3001
   credentials: true
-})); 
+}));
 
 // ----- STATIC FRONTEND -----
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,79 +31,89 @@ const crypto = require('crypto');
 const sessionSecret = crypto.randomBytes(32).toString('hex');
 
 app.use(session({
+  name: 'connect.sid', // add this explicitly
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true }
+  cookie: {
+    secure: false,
+    httpOnly: true
+  }
 }));
 
 // ----- DB CONNECTION (hard-coded) -----
 const db = mysql.createConnection({
-    host: 'localhost',      // <-- your MySQL host
-    user: 'root',           // <-- your MySQL user
-    password: '',               // <-- your MySQL password (empty string if none)
-    database: 'awas_db',         // <-- your database name
-    multipleStatements: true
+  host: 'localhost',      // <-- your MySQL host
+  user: 'root',           // <-- your MySQL user
+  password: '',               // <-- your MySQL password (empty string if none)
+  database: 'awas_db',         // <-- your database name
+  multipleStatements: true
 });
 
 db.connect(err => {
-    if (err) {
-        console.error('DB connection failed:', err.stack);
-        process.exit(1);
-    }
-    console.log('Connected to MySQL :)');
+  if (err) {
+    console.error('DB connection failed:', err.stack);
+    process.exit(1);
+  }
+  console.log('Connected to MySQL :)');
 });
 
 // ----- API ROUTES -----
 
 // WhoAmI endpoint to prevent logout on refresh
 app.get('/whoami', (req, res) => {
-    if (req.session.user) {
-        res.json({ username: req.session.user });
-    } else {
-        res.status(401).json({ username: null });
-    }
+  if (req.session.user) {
+    res.json({ username: req.session.user });
+  } else {
+    res.status(401).json({ username: null });
+  }
 });
 
 // Register
 app.post('/register', (req, res) => {
-    const { username, password } = req.body;
-    const sql = `INSERT INTO users (username, password, money)
+  const { username, password } = req.body;
+  const sql = `INSERT INTO users (username, password, money)
                VALUES ('${username}', '${password}', 0)`;
-    db.query(sql, err => {
-        if (err) return res.status(500).send(err.message);
-        res.status(201).send('User registered');
-    });
+  db.query(sql, err => {
+    if (err) return res.status(500).send(err.message);
+    res.status(201).send('User registered');
+  });
 });
 
 // Login
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    const sql = `SELECT * FROM users
+  const { username, password } = req.body;
+  const sql = `SELECT * FROM users
                WHERE username='${username}' AND password='${password}'`;
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).send(err.message);
-        if (results.length) {
-            req.session.user = username;
-            return res.status(200).send('Login successful');
-        }
-        res.status(401).send('Login failed');
-    });
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    if (results.length) {
+      req.session.user = username;
+      return res.status(200).send('Login successful');
+    }
+    res.status(401).send('Login failed');
+  });
 });
 
 // Logout
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) return res.status(500).send('Logout failed');
-        res.clearCookie('connect.sid');
-        res.send('Logged out');
+  req.session.destroy(err => {
+    if (err) return res.status(500).send('Logout failed');
+
+    res.clearCookie('connect.sid', {
+      path: '/',            // Must match the session path
+      httpOnly: true,       // Must match original
+      secure: false         // Must match original
     });
+
+    res.send('Logged out');
+  });
 });
 
 // Transfer
 app.post('/transfer', (req, res) => {
   const { from, to, amount } = req.body;
-  
+
   // Ensure the logged-in user matches the sender
   if (!req.session.user || req.session.user !== from) {
     return res.status(403).send('Unauthorized');
@@ -152,7 +162,7 @@ app.get('/balance', (req, res) => {
 
 // GET comments (now including timestamp)
 app.get('/comments', (req, res) => {
-  const sql = 'SELECT id, author, text, created_at FROM comments';
+  const sql = 'SELECT id, username, comment, created_at FROM comments';
   db.query(sql, (err, results) => {
     if (err) return res.status(500).send(err.message);
     res.json(results);
@@ -163,11 +173,14 @@ app.get('/comments', (req, res) => {
 app.post('/comments', (req, res) => {
   const { author, text } = req.body;
   const sql = `
-    INSERT INTO comments (author, text)
+    INSERT INTO comments (username, comment)
     VALUES ('${author}', '${text}')
   `;
   db.query(sql, err => {
-    if (err) return res.status(500).send(err.message);
+    if (err) {
+      console.log(err.message);
+      return res.status(500).send(err.message);
+    }
     res.status(201).send('Comment saved');
   });
 });
@@ -183,5 +196,5 @@ app.get('/reset', (req, res) => {
 
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
