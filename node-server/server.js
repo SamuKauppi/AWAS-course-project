@@ -31,10 +31,14 @@ const crypto = require('crypto');
 const sessionSecret = crypto.randomBytes(32).toString('hex');
 
 app.use(session({
+  name: 'connect.sid', // add this explicitly
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true }
+  cookie: {
+    secure: false,
+    httpOnly: true
+  }
 }));
 
 // ----- DB CONNECTION (hard-coded) -----
@@ -95,7 +99,13 @@ app.post('/login', (req, res) => {
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) return res.status(500).send('Logout failed');
-    res.clearCookie('connect.sid');
+
+    res.clearCookie('connect.sid', {
+      path: '/',            // Must match the session path
+      httpOnly: true,       // Must match original
+      secure: false         // Must match original
+    });
+
     res.send('Logged out');
   });
 });

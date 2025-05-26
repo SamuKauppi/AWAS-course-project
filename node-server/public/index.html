@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>vulnerable site</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header>
         <div class="welcome">
@@ -256,15 +258,17 @@
                     chatWindow.innerHTML = '';
                     comments.forEach(comment => {
                         const msgDiv = document.createElement('div');
-                        msgDiv.textContent = `[${comment.created_at}] ${comment.username}: ${comment.comment}`;
+                        msgDiv.innerHTML = `[${comment.created_at}] ${comment.username}: ${comment.comment}`;
                         chatWindow.appendChild(msgDiv);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight;
                 }
             } catch (err) {
-                // Optionally handle error
+                // silently fail
             }
         }
+
     </script>
 </body>
+
 </html>
