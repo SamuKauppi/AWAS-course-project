@@ -10,6 +10,8 @@
         <div class="welcome">
             <h1>Welcome to the Vulnerable Site</h1>
             <p>Log in or Register to access exclusive content.</p>
+            <!--<button id="resetBtn" type="button" style="margin-top:10px;">Reset Database</button>
+            <span id="resetMsg" style="margin-left:10px;color:green;display:none;"></span>-->
         </div>
     </header>
 
@@ -265,6 +267,30 @@
                 // Optionally handle error
             }
         }
+
+        document.getElementById('resetBtn').addEventListener('click', async function () {
+            if (!confirm('Are you sure you want to reset the database? This cannot be undone.')) return;
+            const msgSpan = document.getElementById('resetMsg');
+            msgSpan.style.display = 'none';
+            try {
+                const response = await fetch('http://localhost:3000/reset', {
+                    method: 'GET'
+                });
+                if (response.ok) {
+                    msgSpan.textContent = 'Database reset successful!';
+                    msgSpan.style.color = 'green';
+                } else {
+                    msgSpan.textContent = 'Database reset failed!';
+                    msgSpan.style.color = 'red';
+                }
+                msgSpan.style.display = 'inline';
+            } catch (err) {
+                msgSpan.textContent = 'Network error!';
+                msgSpan.style.color = 'red';
+                msgSpan.style.display = 'inline';
+            }
+        });
+
     </script>
 </body>
 </html>
