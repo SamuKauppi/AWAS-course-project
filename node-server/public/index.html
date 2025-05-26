@@ -256,7 +256,7 @@
                     chatWindow.innerHTML = '';
                     comments.forEach(comment => {
                         const msgDiv = document.createElement('div');
-                        msgDiv.textContent = `[${comment.created_at}] ${comment.author}: ${comment.text}`;
+                        msgDiv.textContent = `[${comment.created_at}] ${comment.username}: ${comment.comment}`;
                         chatWindow.appendChild(msgDiv);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight;
