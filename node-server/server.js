@@ -10,7 +10,13 @@ const app = express();
 const port = 3000;
 
 // ----- CORS -----
-app.use(cors());  
+// tests to include credentials
+//app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // e.g., 5500 or 3001
+  credentials: true
+})); 
+
 // ----- STATIC FRONTEND -----
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -88,7 +94,7 @@ app.get('/logout', (req, res) => {
 // Transfer
 app.post('/transfer', (req, res) => {
   const { from, to, amount } = req.body;
-
+  
   // Ensure the logged-in user matches the sender
   if (!req.session.user || req.session.user !== from) {
     return res.status(403).send('Unauthorized');

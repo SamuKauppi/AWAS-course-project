@@ -1,43 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Awas DB – Auth Test</title>
-  <link rel="stylesheet" href="styles.css"> <!-- if you add CSS later -->
+    <meta charset="UTF-8">
+    <title>vulnerable site</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Awas DB – Auth Test</h1>
+    <header>
+        <div class="welcome">
+            <h1>Welcome to the Vulnerable Site</h1>
+            <p>Log in or Register to access exclusive content.</p>
+        </div>
+    </header>
 
-  <form id="registerForm">
-    <h2>Register</h2>
-    <input name="username" type="text" placeholder="Username" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Register</button>
-  </form>
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button id="loginTabBtn" class="active" onclick="showTab('login')">Log In</button>
+            <button id="registerTabBtn" onclick="showTab('register')">Register</button>
+        </div>
+        <div id="login" class="tab-content active">
+            <form id="loginForm">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+        <div id="register" class="tab-content">
+            <form id="registerForm">
+                <label for="newusername">Username:</label>
+                <input type="text" id="newusername" name="username" required>
+                <label for="newpassword">Password:</label>
+                <input type="password" id="newpassword" name="password" required>
+                <input type="submit" value="Register">
+            </form>
+            <div id="registerSuccessMsg" style="color: green; margin-top: 10px; display: none;"></div>
+        </div>
+    </div>
 
-  <form id="loginForm">
-    <h2>Login</h2>
-    <input name="username" type="text" placeholder="Username" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-  </form>
+    <div id="chatPage" style="display:none;">
+        <div class="user-info">
+            <span id="userDisplay"></span><br>
+            <span id="userBalance"></span>
+            <form id="transferForm" class="transfer-form" style="margin-top:10px;">
+                <label for="transferTo">To:</label>
+                <input type="text" id="transferTo" name="to" required>
+                <label for="transferAmount">Amount:</label>
+                <input type="number" id="transferAmount" name="amount" min="1" required>
+                <button type="submit">Transfer</button>
+            </form>
+            <div id="transferMsg" style="margin-top:5px;color:green;display:none;"></div>
+            <button id="logoutBtn" type="button" style="margin-top:10px;">Logout</button>
+        </div>
+        <div class="chat-container">
+            <div id="chatWindow" class="chat-window"></div>
+            <form id="chatForm" class="chat-form">
+                <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
 
-  <form id="transferForm">
-    <h2>Transfer</h2>
-    <input name="from" type="text" placeholder="From username" required>
-    <input name="to"   type="text" placeholder="To username"   required>
-    <input name="amount" type="number" placeholder="Amount"    required>
-    <button type="submit">Transfer</button>
-  </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function showTab(tab) {
+                document.getElementById('login').classList.remove('active');
+                document.getElementById('register').classList.remove('active');
+                document.getElementById('loginTabBtn').classList.remove('active');
+                document.getElementById('registerTabBtn').classList.remove('active');
+                document.getElementById(tab).classList.add('active');
+                document.getElementById(tab + 'TabBtn').classList.add('active');
+            }
+            window.showTab = showTab; // Make it available globally for button onclick
 
-  <div>
-    <h2>Logout</h2>
-    <button id="logoutBtn">Logout</button>
-  </div>
+            function toUrlEncoded(obj) {
+                return Object.keys(obj)
+                    .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]))
+                    .join('&');
+            }
 
-  <h2>Status</h2>
-  <pre id="status">Ready</pre>
+            document.getElementById('loginForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
 
-  <script src="app.js"></script>
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: toUrlEncoded({ username, password }),
+                    credentials: 'include' // test
+                });
+                const data = await response.text();
+                console.log(data);
+                if (response.ok) {
+                    localStorage.setItem('username', username);
+                    document.querySelector('.tab-container').style.display = 'none';
+                    document.getElementById('chatPage').style.display = 'block';
+                    document.getElementById('userDisplay').textContent = 'Logged in as: ' + username;
+                    fetchAndShowBalance(username);
+                }
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                localStorage.removeItem('username');
+                document.getElementById('chatPage').style.display = 'none';
+                document.querySelector('.tab-container').style.display = 'block';
+            });
+
+            document.getElementById('chatForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const chatInput = document.getElementById('chatInput');
+                const message = chatInput.value.trim();
+                if (message) {
+                    const chatWindow = document.getElementById('chatWindow');
+                    const username = localStorage.getItem('username') || 'You';
+                    const msgDiv = document.createElement('div');
+                    msgDiv.textContent = username + ': ' + message;
+                    chatWindow.appendChild(msgDiv);
+                    chatInput.value = '';
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                }
+            });
+
+            document.getElementById('registerForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const username = document.getElementById('newusername').value;
+                const password = document.getElementById('newpassword').value;
+
+                const response = await fetch('http://localhost:3000/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: toUrlEncoded({ username, password })
+                });
+                const data = await response.text();
+                console.log(data);
+                const msgDiv = document.getElementById('registerSuccessMsg');
+                if (response.ok) {
+                    msgDiv.textContent = 'Registration successful!';
+                    msgDiv.style.display = 'block';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    msgDiv.textContent = 'Registration failed: ' + data;
+                    msgDiv.style.display = 'block';
+                }
+            });
+
+            async function fetchAndShowBalance(username) {
+                try {
+                    const response = await fetch(`http://localhost:3000/balance?username=${encodeURIComponent(username)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('userBalance').textContent = 'Balance: $' + data.money;
+                    } else {
+                        document.getElementById('userBalance').textContent = 'Balance: N/A';
+                    }
+                } catch (err) {
+                    document.getElementById('userBalance').textContent = 'Balance: N/A';
+                }
+            }
+
+            document.getElementById('transferForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const from = localStorage.getItem('username');
+                const to = document.getElementById('transferTo').value.trim();
+                const amount = parseFloat(document.getElementById('transferAmount').value);
+                const msgDiv = document.getElementById('transferMsg');
+                msgDiv.style.display = 'none';
+
+                if (!from || !to || !amount || amount <= 0) {
+                    msgDiv.textContent = 'Invalid input.';
+                    msgDiv.style.color = 'red';
+                    msgDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3000/transfer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: toUrlEncoded({ from, to, amount }),
+                        credentials: 'include' //test
+                    });
+                    const data = await response.text();
+                    if (response.ok) {
+                        msgDiv.textContent = 'Transfer successful!';
+                        msgDiv.style.color = 'green';
+                        fetchAndShowBalance(from);
+                        document.getElementById('transferForm').reset();
+                    } else {
+                        msgDiv.textContent = 'Transfer failed: ' + data;
+                        msgDiv.style.color = 'red';
+                    }
+                    msgDiv.style.display = 'block';
+                } catch (err) {
+                    msgDiv.textContent = 'Transfer failed: Network error';
+                    msgDiv.style.color = 'red';
+                    msgDiv.style.display = 'block';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
