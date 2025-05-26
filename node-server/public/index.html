@@ -80,6 +80,45 @@
                     .join('&');
             }
 
+            let commentsInterval = null;
+
+            function startCommentsInterval() {
+                if (commentsInterval) clearInterval(commentsInterval);
+                commentsInterval = setInterval(loadComments, 5000);
+            }
+
+            function stopCommentsInterval() {
+                if (commentsInterval) clearInterval(commentsInterval);
+                commentsInterval = null;
+            }
+
+            // Check session on page load
+            (async function checkSession() {
+                try {
+                    const response = await fetch('http://localhost:3000/whoami', {
+                        credentials: 'include'
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.username) {
+                            localStorage.setItem('username', data.username);
+                            document.querySelector('.tab-container').style.display = 'none';
+                            document.getElementById('chatPage').style.display = 'block';
+                            document.getElementById('userDisplay').textContent = 'Logged in as: ' + data.username;
+                            fetchAndShowBalance(data.username);
+                            loadComments();
+                            startCommentsInterval();
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    // ignore
+                }
+                document.querySelector('.tab-container').style.display = 'block';
+                document.getElementById('chatPage').style.display = 'none';
+                stopCommentsInterval();
+            })();
+
             document.getElementById('loginForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const username = document.getElementById('username').value;
@@ -89,7 +128,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: toUrlEncoded({ username, password }),
-                    credentials: 'include' // test
+                    credentials: 'include'
                 });
                 const data = await response.text();
                 console.log(data);
@@ -99,6 +138,8 @@
                     document.getElementById('chatPage').style.display = 'block';
                     document.getElementById('userDisplay').textContent = 'Logged in as: ' + username;
                     fetchAndShowBalance(username);
+                    loadComments();
+                    startCommentsInterval();
                 }
             });
 
@@ -106,20 +147,23 @@
                 localStorage.removeItem('username');
                 document.getElementById('chatPage').style.display = 'none';
                 document.querySelector('.tab-container').style.display = 'block';
+                stopCommentsInterval();
             });
 
-            document.getElementById('chatForm').addEventListener('submit', function (e) {
+            document.getElementById('chatForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const chatInput = document.getElementById('chatInput');
-                const message = chatInput.value.trim();
-                if (message) {
-                    const chatWindow = document.getElementById('chatWindow');
-                    const username = localStorage.getItem('username') || 'You';
-                    const msgDiv = document.createElement('div');
-                    msgDiv.textContent = username + ': ' + message;
-                    chatWindow.appendChild(msgDiv);
+                const text = chatInput.value.trim();
+                const author = localStorage.getItem('username') || 'You';
+                if (text) {
+                    await fetch('http://localhost:3000/comments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: toUrlEncoded({ author, text }),
+                        credentials: 'include'
+                    });
                     chatInput.value = '';
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                    loadComments();
                 }
             });
 
@@ -180,7 +224,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: toUrlEncoded({ from, to, amount }),
-                        credentials: 'include' //test
+                        credentials: 'include'
                     });
                     const data = await response.text();
                     if (response.ok) {
@@ -200,6 +244,27 @@
                 }
             });
         });
+
+        async function loadComments() {
+            try {
+                const response = await fetch('http://localhost:3000/comments', {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const comments = await response.json();
+                    const chatWindow = document.getElementById('chatWindow');
+                    chatWindow.innerHTML = '';
+                    comments.forEach(comment => {
+                        const msgDiv = document.createElement('div');
+                        msgDiv.textContent = `[${comment.created_at}] ${comment.author}: ${comment.text}`;
+                        chatWindow.appendChild(msgDiv);
+                    });
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                }
+            } catch (err) {
+                // Optionally handle error
+            }
+        }
     </script>
 </body>
 </html>

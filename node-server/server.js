@@ -56,6 +56,15 @@ db.connect(err => {
 
 // ----- API ROUTES -----
 
+// WhoAmI endpoint to prevent logout on refresh
+app.get('/whoami', (req, res) => {
+    if (req.session.user) {
+        res.json({ username: req.session.user });
+    } else {
+        res.status(401).json({ username: null });
+    }
+});
+
 // Register
 app.post('/register', (req, res) => {
     const { username, password } = req.body;
