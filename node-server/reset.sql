@@ -16,6 +16,7 @@ CREATE TABLE comments (
 );
 
 INSERT INTO users (username, password, money) VALUES
+('target', 'nopass', 1000000),
 ('alice', 'password123', 100),
 ('bob', 'hunter2', 50),
 ('charlie', 'qwerty', 0);

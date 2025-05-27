@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vulnerable Site – Auth</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="welcome">
+      <h1>Welcome to the Vulnerable Site</h1>
+      <p>Log in or Register to access exclusive content.</p>
+    </div>
+  </header>
+
+  <div class="tab-container">
+    <div class="tab-buttons">
+      <button id="loginTabBtn" class="active" onclick="showTab('login')">Log In</button>
+      <button id="registerTabBtn" onclick="showTab('register')">Register</button>
+    </div>
+
+    <div id="login" class="tab-content active">
+      <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+      </form>
+    </div>
+
+    <div id="register" class="tab-content">
+      <form id="registerForm">
+        <label for="newusername">Username:</label>
+        <input type="text" id="newusername" name="username" required>
+        <label for="newpassword">Password:</label>
+        <input type="password" id="newpassword" name="password" required>
+        <input type="submit" value="Register">
+      </form>
+      <div id="registerSuccessMsg" style="color: green; margin-top: 10px; display: none;"></div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
