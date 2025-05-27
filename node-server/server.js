@@ -80,39 +80,71 @@ app.post('/register', (req, res) => {
   });
 });
 
-// Login
+// Session status (is a session active)
+app.get('/session-status', (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true, user: req.session.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+// LOGIN – vulnerable version (no password hashing, SQL injection possible)
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+
+  // Build SQL query – vulnerable to SQL injection
   const sql = `SELECT * FROM users
                WHERE username='${username}' AND password='${password}'`;
+
+  // Query the DB
   db.query(sql, (err, results) => {
-    if (err) return res.status(500).send(err.message);
+    if (err) {
+      // DB error (e.g. connection failure)
+      return res.status(500).send(err.message);
+    }
+
     if (results.length) {
+      // User found – store user session
       req.session.user = username;
       return res.status(200).send('Login successful');
     }
-    res.status(401).send('Login failed');
+
+    // No match found – bad credentials
+    res.status(401).send('Invalid username or password');
   });
 });
 
-// Logout
-app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) return res.status(500).send('Logout failed');
 
+// LOGOUT – ends the user session
+app.post('/logout', (req, res) => {
+  // No session? Deny the request
+  if (!req.session.user) {
+    return res.status(401).send('Not logged in');
+  }
+
+  // Destroy the session
+  req.session.destroy(err => {
+    if (err) {
+      // Failed to destroy session
+      return res.status(500).send('Server error during logout');
+    }
+
+    // Clear session cookie on client
     res.clearCookie('connect.sid', {
-      path: '/',            // Must match the session path
-      httpOnly: true,       // Must match original
-      secure: false         // Must match original
+      path: '/',        // must match cookie path used in express-session
+      httpOnly: true,   // only accessible via HTTP(S), not JS
+      secure: false     // true if using HTTPS
     });
 
-    res.send('Logged out');
+    // 204 No Content – logout successful, no body needed
+    res.sendStatus(204);
   });
 });
 
-// Transfer
-app.post('/transfer', (req, res) => {
-  const { from, to, amount } = req.body;
+// Transfer money
+app.get('/transfer', (req, res) => {
+  const { from, to, amount } = req.query;
 
   // Ensure the logged-in user matches the sender
   if (!req.session.user || req.session.user !== from) {
