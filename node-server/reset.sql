@@ -19,7 +19,8 @@ INSERT INTO users (username, password, money) VALUES
 ('rich_man', 'nopass', 1000000),
 ('alice', 'password123', 100),
 ('bob', 'hunter2', 50),
-('charlie', 'qwerty', 0);
+('charlie', 'qwerty', 0),
+('admin', 'bestadminever', 0);
 
 INSERT INTO comments (username, created_at, comment) VALUES
 ('alice', '2023-05-01 10:30:00', 'Why are there so many hackers?'),
