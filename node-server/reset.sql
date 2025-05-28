@@ -19,10 +19,11 @@ INSERT INTO users (username, password, money) VALUES
 ('rich_man', 'nopass', 1000000),
 ('alice', 'password123', 100),
 ('bob', 'hunter2', 50),
-('charlie', 'qwerty', 0),
+('charlie', 'qwerty', 10),
 ('admin', 'bestadminever', 0);
 
 INSERT INTO comments (username, created_at, comment) VALUES
 ('alice', '2023-05-01 10:30:00', 'Why are there so many hackers?'),
 ('bob', '2023-05-02 12:00:00', 'Hello from Bob!'),
-('rich_man', '2023-05-03 14:45:00', 'I have so much money!');
+('rich_man', '2023-05-03 14:45:00', 'I have so much money!'),
+('admin', '2020-01-05 00:00:00', 'This website is unhackable!');

@@ -179,8 +179,8 @@ app.get('/transfer', (req, res) => {
 // Get for user balance, test
 app.get('/balance', (req, res) => {
   const { username } = req.query;
-  const sql = `SELECT money FROM users WHERE username = ?`;
-  db.query(sql, [username], (err, results) => {
+  const sql = `SELECT money FROM users WHERE username = '${username}'`;
+  db.query(sql, (err, results) => {
     if (err) return res.status(500).send(err.message);
     if (results.length === 0) return res.status(404).send('User not found');
     res.json({ money: results[0].money });
@@ -211,17 +211,6 @@ app.post('/comments', (req, res) => {
     res.status(201).send('Comment saved');
   });
 });
-
-// User search (vulnerable to SQL-injection)
-app.get('/search', (req, res) => {
-  const term = req.query.term;
-  const sql = `SELECT username FROM users WHERE username LIKE '%${term}%'`;
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).send(err.message);
-    res.json(results.map(r => r.username));
-  });
-});
-
 
 // Reset Database
 app.get('/reset', (req, res) => {
