@@ -150,3 +150,8 @@ form input[type="submit"] {
 #searchResults li:hover {
     color: blue;
 }
+.success-message {
+    color: green;
+    margin-top: 10px;
+    display: none;
+}

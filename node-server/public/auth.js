@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.showTab = showTab;
 
+  // tab button listeners added
+  document.getElementById('loginTabBtn').addEventListener('click', () => showTab('login'));
+  document.getElementById('registerTabBtn').addEventListener('click', () => showTab('register'));
+
   // URL-encode helper
   function toUrlEncoded(obj) {
     return Object.keys(obj)
@@ -18,11 +22,30 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('&');
   }
 
+  function isValidUsername(username) {
+      return /^[a-zA-Z0-9_]{3,20}$/.test(username);
+  }
+
+  function isValidPassword(password) {
+      return typeof password === 'string' && password.length >= 6;
+    }
+
   // REGISTER handler
   document.getElementById('registerForm').addEventListener('submit', async e => {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
+
+    if (!isValidUsername(username)) {
+        alert("Username must be 3–20 characters, only letters, numbers, and underscores.");
+        return;
+      }
+
+    if (!isValidPassword(password)) {
+        alert("Password must be at least 6 characters long.");
+        return;
+    }
+
     const res = await fetch('/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -46,6 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
+
+    if (!isValidUsername(username)) {
+        alert("Username must be 3–20 characters, only letters, numbers, and underscores.");
+        return;
+    }
+
+    if (!isValidPassword(password)) {
+        alert("Password must be at least 6 characters long.");
+        return;
+    }
+  
     const res = await fetch('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

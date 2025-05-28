@@ -17,6 +17,22 @@ app.use(cors({
   credentials: true
 }));
 
+// ----- CSP HEADER -----
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none';"
+  );
+  next();
+});
+// ----- Input Validation -----//
+function isValidUsername(username) {
+  return typeof username === 'string' && /^[a-zA-Z0-9]{3,20}$/.test(username);
+}
+function isValidPassword(password) {
+  return typeof password === 'string' && password.length >= 6;
+}
+
 // ----- STATIC FRONTEND -----
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -73,6 +89,11 @@ app.get('/session-status', (req, res) => {
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
+  // validate username and password
+  if (!isValidUsername(username) || !isValidPassword(password)) {
+  return res.status(400).send('Invalid username or password format.');
+  }
+
   // Parameterized INSERT
   const sql = `
     INSERT INTO users (username, password, money)
@@ -90,6 +111,11 @@ app.post('/register', (req, res) => {
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+
+  // validate username and password
+  if (!isValidUsername(username) || !isValidPassword(password)) {
+  return res.status(400).send('Invalid username or password format.');
+  }
 
   // Use parameterized query instead of string concatenation
   const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
@@ -144,6 +170,11 @@ app.get('/transfer', (req, res) => {
   // Ensure the logged-in user matches the sender
   if (!req.session.user || req.session.user !== from) {
     return res.status(403).send('Unauthorized');
+  }
+
+  // Validate input
+  if (!from || !to || from === to || isNaN(amt) || amt <= 0) {
+    return res.status(400).send('Invalid input');
   }
 
   const checkSql = `SELECT money FROM users WHERE username='${from}'`;
