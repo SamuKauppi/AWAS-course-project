@@ -3,7 +3,7 @@
     margin: 40px auto;
     border: 1px solid #ccc;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     background: #fafafa;
 }
@@ -14,30 +14,30 @@
     margin-bottom: 20px;
 }
 
-    .tab-buttons button {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        background: #eee;
-        cursor: pointer;
-        font-size: 16px;
-        border-radius: 4px 4px 0 0;
-        transition: background 0.2s;
-    }
+.tab-buttons button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px 4px 0 0;
+    transition: background 0.2s;
+}
 
-        .tab-buttons button.active {
-            background: #fff;
-            border-bottom: 2px solid #0078d7;
-            font-weight: bold;
-        }
+.tab-buttons button.active {
+    background: #fff;
+    border-bottom: 2px solid #0078d7;
+    font-weight: bold;
+}
 
 .tab-content {
     display: none;
 }
 
-    .tab-content.active {
-        display: block;
-    }
+.tab-content.active {
+    display: block;
+}
 
 form label {
     display: block;
@@ -63,6 +63,7 @@ form input[type="submit"] {
     font-size: 16px;
     cursor: pointer;
 }
+
 .welcome {
     text-align: center;
     margin-bottom: 20px;
@@ -75,10 +76,11 @@ form input[type="submit"] {
     margin-bottom: 8px;
 }
 
-    .transfer-form input, .transfer-form button {
-        padding: 4px;
-        font-size: 1em;
-    }
+.transfer-form input,
+.transfer-form button {
+    padding: 4px;
+    font-size: 1em;
+}
 
 .user-info {
     position: absolute;
@@ -129,6 +131,7 @@ form input[type="submit"] {
     color: #fff;
     cursor: pointer;
 }
+
 .user-info button {
     display: block;
     margin-top: 8px;
@@ -140,6 +143,10 @@ form input[type="submit"] {
     cursor: pointer;
 }
 
-    .user-info button:hover {
-        background: #b52a37;
-    }
+.user-info button:hover {
+    background: #b52a37;
+}
+
+#searchResults li:hover {
+    color: blue;
+}

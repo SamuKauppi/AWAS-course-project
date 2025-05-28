@@ -60,27 +60,7 @@ db.connect(err => {
 
 // ----- API ROUTES -----
 
-// WhoAmI endpoint to prevent logout on refresh
-app.get('/whoami', (req, res) => {
-  if (req.session.user) {
-    res.json({ username: req.session.user });
-  } else {
-    res.status(401).json({ username: null });
-  }
-});
-
-// Register
-app.post('/register', (req, res) => {
-  const { username, password } = req.body;
-  const sql = `INSERT INTO users (username, password, money)
-               VALUES ('${username}', '${password}', 0)`;
-  db.query(sql, err => {
-    if (err) return res.status(500).send(err.message);
-    res.status(201).send('User registered');
-  });
-});
-
-// Session status (is a session active)
+// Session status (is a session active) 
 app.get('/session-status', (req, res) => {
   if (req.session.user) {
     res.json({ loggedIn: true, user: req.session.user });
@@ -89,29 +69,44 @@ app.get('/session-status', (req, res) => {
   }
 });
 
-// LOGIN – vulnerable version (no password hashing, SQL injection possible)
+// Register
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+
+  // Parameterized INSERT
+  const sql = `
+    INSERT INTO users (username, password, money)
+    VALUES (?, ?, 0)
+  `;
+  db.query(sql, [username.trim(), password.trim()], err => {
+    if (err) {
+      // duplicate username, etc.
+      return res.status(500).send(err.message);
+    }
+    res.status(201).send('User registered');
+  });
+});
+
+// Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
-  // Build SQL query – vulnerable to SQL injection
-  const sql = `SELECT * FROM users
-               WHERE username='${username}' AND password='${password}'`;
-
-  // Query the DB
-  db.query(sql, (err, results) => {
+  // Use parameterized query instead of string concatenation
+  const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
+  db.query(sql, [username, password], (err, results) => {
     if (err) {
-      // DB error (e.g. connection failure)
       return res.status(500).send(err.message);
     }
-
-    if (results.length) {
-      // User found – store user session
-      req.session.user = username;
-      return res.status(200).send('Login successful');
+    if (results.length > 0) {
+      // regenerate session to avoid fixation
+      req.session.regenerate(err => {
+        if (err) return res.status(500).send('Session error');
+        req.session.user = results[0].username;
+        res.status(200).send('Login successful');
+      });
+    } else {
+      res.status(401).send('Invalid credentials');
     }
-
-    // No match found – bad credentials
-    res.status(401).send('Invalid username or password');
   });
 });
 
@@ -192,7 +187,7 @@ app.get('/balance', (req, res) => {
   });
 });
 
-// GET comments (now including timestamp)
+// GET comments
 app.get('/comments', (req, res) => {
   const sql = 'SELECT id, username, comment, created_at FROM comments';
   db.query(sql, (err, results) => {
@@ -216,6 +211,17 @@ app.post('/comments', (req, res) => {
     res.status(201).send('Comment saved');
   });
 });
+
+// User search (vulnerable to SQL-injection)
+app.get('/search', (req, res) => {
+  const term = req.query.term;
+  const sql = `SELECT username FROM users WHERE username LIKE '%${term}%'`;
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    res.json(results.map(r => r.username));
+  });
+});
+
 
 // Reset Database
 app.get('/reset', (req, res) => {

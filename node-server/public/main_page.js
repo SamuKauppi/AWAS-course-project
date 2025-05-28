@@ -6,6 +6,36 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('&');
   }
 
+  // User search
+  document.getElementById('searchInput').addEventListener('input', async e => {
+    const term = e.target.value.trim();
+    const resultsBox = document.getElementById('searchResults');
+    resultsBox.innerHTML = '';
+
+    if (term.length < 2) return;
+
+    try {
+      const res = await fetch(`/search?term=${encodeURIComponent(term)}`, {
+        credentials: 'include'
+      });
+      const users = await res.json();
+
+      users.forEach(u => {
+        const li = document.createElement('li');
+        li.textContent = u;
+        li.style.cursor = 'pointer';
+        li.style.textDecoration = 'underline';
+        li.addEventListener('click', () => {
+          document.getElementById('transferTo').value = u;
+        });
+        resultsBox.appendChild(li);
+      });
+    } catch {
+      // silently fail
+    }
+  });
+
+
   // Load comments once on page load
   async function loadComments() {
     try {

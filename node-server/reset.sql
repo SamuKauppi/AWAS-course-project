@@ -16,11 +16,12 @@ CREATE TABLE comments (
 );
 
 INSERT INTO users (username, password, money) VALUES
-('target', 'nopass', 1000000),
+('rich_man', 'nopass', 1000000),
 ('alice', 'password123', 100),
 ('bob', 'hunter2', 50),
 ('charlie', 'qwerty', 0);
 
-INSERT INTO comments (username, comment) VALUES
-('alice', 'Why are there so many hackers?'),
-('bob', 'Hello from Bob!');
+INSERT INTO comments (username, created_at, comment) VALUES
+('alice', '2023-05-01 10:30:00', 'Why are there so many hackers?'),
+('bob', '2023-05-02 12:00:00', 'Hello from Bob!'),
+('rich_man', '2023-05-03 14:45:00', 'I have so much money!');
