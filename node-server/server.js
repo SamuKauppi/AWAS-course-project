@@ -27,8 +27,9 @@ app.use((req, res, next) => {
 });
 // ----- Input Validation -----//
 function isValidUsername(username) {
-  return typeof username === 'string' && /^[a-zA-Z0-9]{3,20}$/.test(username);
+  return typeof username === 'string' && /^[a-zA-Z0-9_]{3,20}$/.test(username);
 }
+
 function isValidPassword(password) {
   return typeof password === 'string' && password.length >= 6;
 }
@@ -172,10 +173,10 @@ app.get('/transfer', (req, res) => {
     return res.status(403).send('Unauthorized');
   }
 
-  // Validate input
-  if (!from || !to || from === to || isNaN(amt) || amt <= 0) {
-    return res.status(400).send('Invalid input');
-  }
+  // // Validate input
+  // if (!from || !to || from === to || isNaN(amt) || amt <= 0) {
+  //   return res.status(400).send('Invalid input');
+  // }
 
   const checkSql = `SELECT money FROM users WHERE username='${from}'`;
   db.query(checkSql, (err, results) => {
