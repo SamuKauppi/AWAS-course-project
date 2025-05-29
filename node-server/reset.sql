@@ -23,7 +23,7 @@ INSERT INTO users (username, password, money) VALUES
 ('admin', 'bestadminever', 0);
 
 INSERT INTO comments (username, created_at, comment) VALUES
+('admin', '2020-01-05 00:00:00', 'This website is unhackable!'),
 ('alice', '2023-05-01 10:30:00', 'Why are there so many hackers?'),
 ('bob', '2023-05-02 12:00:00', 'Hello from Bob!'),
-('rich_man', '2023-05-03 14:45:00', 'I have so much money!'),
-('admin', '2020-01-05 00:00:00', 'This website is unhackable!');
+('rich_man', '2023-05-03 14:45:00', 'I have so much money!');

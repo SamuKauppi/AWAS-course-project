@@ -81,7 +81,7 @@ app.post('/register', (req, res) => {
   db.query(sql, [username.trim(), password.trim()], err => {
     if (err) {
       // duplicate username, etc.
-      return res.status(500).send(err.message);
+      return res.status(500).send("An unexpected error occured");
     }
     res.status(201).send('User registered');
   });
@@ -95,7 +95,7 @@ app.post('/login', (req, res) => {
   const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
   db.query(sql, [username, password], (err, results) => {
     if (err) {
-      return res.status(500).send(err.message);
+      return res.status(500).send("An unexpected error occured");
     }
     if (results.length > 0) {
       // regenerate session to avoid fixation
@@ -148,7 +148,7 @@ app.get('/transfer', (req, res) => {
 
   const checkSql = `SELECT money FROM users WHERE username='${from}'`;
   db.query(checkSql, (err, results) => {
-    if (err) return res.status(500).send(err.message);
+    if (err) return res.status(500).send("An unexpected error occured");
     if (results.length === 0) return res.status(404).send('Sender not found');
     const balance = results[0].money;
     if (balance < amount) return res.status(400).send('Insufficient funds');
@@ -160,7 +160,7 @@ app.get('/transfer', (req, res) => {
       WHERE username = '${from}'
     `;
     db.query(withdrawSql, (err) => {
-      if (err) return res.status(500).send(err.message);
+      if (err) return res.status(500).send("An unexpected error occured");
 
       // Credit to receiver
       const depositSql = `
@@ -169,14 +169,14 @@ app.get('/transfer', (req, res) => {
         WHERE username = '${to}'
       `;
       db.query(depositSql, (err2) => {
-        if (err2) return res.status(500).send(err2.message);
+        if (err2) return res.status(500).send("An unexpected error occured");
         res.send(`Transferred ${amount} from ${from} to ${to}`);
       });
     });
   });
 });
 
-// Get for user balance, test
+// Get for user balance
 app.get('/balance', (req, res) => {
   const { username } = req.query;
   const sql = `SELECT money FROM users WHERE username = '${username}'`;
@@ -191,7 +191,7 @@ app.get('/balance', (req, res) => {
 app.get('/comments', (req, res) => {
   const sql = 'SELECT id, username, comment, created_at FROM comments';
   db.query(sql, (err, results) => {
-    if (err) return res.status(500).send(err.message);
+    if (err) return res.status(500).send("An unexpected error occured");
     res.json(results);
   });
 });
@@ -199,11 +199,13 @@ app.get('/comments', (req, res) => {
 // POST new comment (DB defaults created_at to NOW())
 app.post('/comments', (req, res) => {
   const { author, text } = req.body;
+
   const sql = `
     INSERT INTO comments (username, comment)
-    VALUES ('${author}', '${text}')
+    VALUES (?, ?)
   `;
-  db.query(sql, err => {
+
+  db.query(sql, [author, text], err => {
     if (err) {
       console.log(err.message);
       return res.status(500).send(err.message);
@@ -212,11 +214,12 @@ app.post('/comments', (req, res) => {
   });
 });
 
+
 // Reset Database
 app.get('/reset', (req, res) => {
   const sql = fs.readFileSync(path.join(__dirname, 'reset.sql')).toString();
   db.query(sql, err => {
-    if (err) return res.status(500).send(err.message);
+    if (err) return res.status(500).send("An unexpected error occured");
     res.send('Database reset to default state.');
   });
 });
