@@ -7,33 +7,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // User search
-  document.getElementById('searchInput').addEventListener('input', async e => {
-    const term = e.target.value.trim();
-    const resultsBox = document.getElementById('searchResults');
-    resultsBox.innerHTML = '';
+  //document.getElementById('searchInput').addEventListener('input', async e => {
+  //  const term = e.target.value.trim();
+  //  const resultsBox = document.getElementById('searchResults');
+  //  resultsBox.innerHTML = '';
 
-    if (term.length < 2) return;
+  //  if (term.length < 2) return;
 
-    try {
-      const res = await fetch(`/search?term=${encodeURIComponent(term)}`, {
-        credentials: 'include'
-      });
-      const users = await res.json();
+  //  try {
+  //    const res = await fetch(`/search?term=${encodeURIComponent(term)}`, {
+  //      credentials: 'include'
+  //    });
+  //    const users = await res.json();
 
-      users.forEach(u => {
-        const li = document.createElement('li');
-        li.textContent = u;
-        li.style.cursor = 'pointer';
-        li.style.textDecoration = 'underline';
-        li.addEventListener('click', () => {
-          document.getElementById('transferTo').value = u;
-        });
-        resultsBox.appendChild(li);
-      });
-    } catch {
-      // silently fail
-    }
-  });
+  //    users.forEach(u => {
+  //      const li = document.createElement('li');
+  //      li.textContent = u;
+  //      li.style.cursor = 'pointer';
+  //      li.style.textDecoration = 'underline';
+  //      li.addEventListener('click', () => {
+  //        document.getElementById('transferTo').value = u;
+  //      });
+  //      resultsBox.appendChild(li);
+  //    });
+  //  } catch {
+  //    // silently fail
+  //  }
+  //});
 
 
   // Load comments once on page load
@@ -96,6 +96,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const amount = e.target.amount.value;
     const msg = document.getElementById('transferMsg');
     msg.style.display = 'none';
+
+      // Basic input validation
+      if (!to || to === from) {
+          msg.textContent = 'Invalid recipient.';
+          msg.style.color = 'red';
+          msg.style.display = 'block';
+          return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+          msg.textContent = 'Amount must be a positive number.';
+          msg.style.color = 'red';
+          msg.style.display = 'block';
+          return;
+      }
+
+      //// Check recipient exists
+      //try {
+      //    const res = await fetch(`/user-exists?username=${encodeURIComponent(to)}`, { credentials: 'include' });
+      //    const data = await res.json();
+      //    if (!data.exists) {
+      //        msg.textContent = 'Recipient does not exist.';
+      //        msg.style.color = 'red';
+      //        msg.style.display = 'block';
+      //        return;
+      //    }
+      //} catch {
+      //    msg.textContent = 'Could not verify recipient.';
+      //    msg.style.color = 'red';
+      //    msg.style.display = 'block';
+      //    return;
+      //}
+
+      // Check sender's balance
+      let balance = 0;
+      try {
+          const res = await fetch(`/balance?username=${encodeURIComponent(from)}`);
+          const b = await res.json();
+          balance = parseFloat(b.money);
+          if (amount > balance) {
+              msg.textContent = 'Insufficient funds.';
+              msg.style.color = 'red';
+              msg.style.display = 'block';
+              return;
+          }
+      } catch {
+          msg.textContent = 'Could not verify balance.';
+          msg.style.color = 'red';
+          msg.style.display = 'block';
+          return;
+      }
 
     // Build GET query URL
     const url = `/transfer?${toQueryString({ from, to, amount })}`;
