@@ -214,7 +214,7 @@ app.get('/balance', (req, res) => {
   db.query(sql, (err, results) => {
     if (err) return res.status(500).send(err.message);
     if (results.length === 0) return res.status(404).send('User not found');
-    res.json({ money: results[0].money });
+    res.json(results);
   });
 });
 
