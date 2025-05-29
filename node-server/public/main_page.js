@@ -40,11 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load balance
             fetch(`/balance?username=${encodeURIComponent(data.user)}`)
                 .then(r => r.json())
-                .then(b => {
-                    document.getElementById('userBalance').textContent = 'Balance: $' + b.money;
+                .then(rows => {
+                    // take only the first row
+                    const val = (rows[0] && Number(rows[0].money)) || 0;
+                    // render as textContent (so <script> stays inert)
+                    document.getElementById('userBalance')
+                        .textContent = 'Balance: $' + val;
                 })
                 .catch(() => {
-                    document.getElementById('userBalance').textContent = 'Balance: N/A';
+                    document.getElementById('userBalance')
+                        .textContent = 'Balance: N/A';
                 });
 
             // Load comments once
